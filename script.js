@@ -219,7 +219,7 @@ canvas.addEventListener('pointermove', event => {
   pointerY = (event.clientY / innerHeight - 0.5) * 0.22;
 });
 canvas.addEventListener('pointerdown', () => {
-  manualUntil = clock.getElapsedTime() + 5;
+  manualUntil = elapsed + 5;
   exploded ? reformHeart() : spawnHeartBurst();
 });
 
@@ -237,12 +237,15 @@ document.querySelector('#soundBtn').addEventListener('click', event => {
   if (soundEnabled) playTone(660);
 });
 
-const clock = new THREE.Clock();
+let elapsed = 0;
+let lastFrameTime = performance.now();
 function animate() {
   requestAnimationFrame(animate);
+  const now = performance.now();
+  const delta = Math.min((now - lastFrameTime) / 1000, 0.05);
+  lastFrameTime = now;
   if (paused) return;
-
-  const elapsed = clock.getElapsedTime();
+  elapsed += delta;
   const cycleTime = elapsed % 13;
   const phase = cycleTime < 4 ? 0 : cycleTime < 8 ? 1 : cycleTime < 9 ? 2 : 3;
 
