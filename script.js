@@ -224,7 +224,7 @@ canvas.addEventListener('pointerdown', () => {
 });
 
 document.querySelector('#explodeBtn').addEventListener('click', () => {
-  manualUntil = clock.getElapsedTime() + 5;
+  manualUntil = elapsed + 5;
   exploded ? reformHeart() : spawnHeartBurst();
 });
 document.querySelector('#pauseBtn').addEventListener('click', event => {
