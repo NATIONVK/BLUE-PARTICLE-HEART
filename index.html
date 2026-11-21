@@ -584,7 +584,7 @@ class AmbientParticle{
     ctx.globalAlpha=this.alpha*
       (.7+.3*Math.sin(clock*2+this.phase));
 
-    ctx.fillStyle="#258fff";
+    ctx.fillStyle=activeColor;
 
     ctx.beginPath();
     ctx.arc(this.x,this.y,this.size,0,TAU);
@@ -622,6 +622,11 @@ function drawOrbiters(){
   ctx.save();
   ctx.globalCompositeOperation="source-over";
 
+  for(let ring=0;ring<3;ring++){
+    ctx.beginPath();ctx.ellipse(heartCenter.x,heartCenter.y,scale*(19+ring*2.2),scale*(12+ring*1.5),Math.sin(clock*.18+ring)*.22,0,TAU);
+    ctx.strokeStyle=colorRGBA(.12-ring*.025);ctx.lineWidth=1;ctx.stroke();
+  }
+
   for(const o of orbiters){
     const radius=scale*18*o.radius;
 
@@ -634,7 +639,7 @@ function drawOrbiters(){
     ctx.globalAlpha=.45+
       .12*Math.sin(clock*2+o.phase);
 
-    ctx.fillStyle="#258fff";
+    ctx.fillStyle=activeColor;
 
     ctx.beginPath();
     ctx.arc(x,y,o.size,0,TAU);
@@ -922,8 +927,8 @@ function drawGlassGlow(){
     heartCenter.x,heartCenter.y,scale*22
   );
 
-  glow.addColorStop(0,"rgba(0,45,130,.065)");
-  glow.addColorStop(.45,"rgba(0,25,100,.025)");
+  glow.addColorStop(0,colorRGBA(.075));
+  glow.addColorStop(.45,colorRGBA(.025));
   glow.addColorStop(1,"rgba(0,0,0,0)");
 
   ctx.fillStyle=glow;
