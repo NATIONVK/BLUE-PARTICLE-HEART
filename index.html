@@ -177,10 +177,10 @@ input[type="range"]{
   <div class="control">
     <div class="controlTop">
       <label for="motion">Particle Movement</label>
-      <output id="motionValue">100%</output>
+      <output id="motionValue">300%</output>
     </div>
     <input id="motion" type="range"
-      min="50" max="200" value="100" step="5">
+      min="100" max="600" value="300" step="25">
   </div>
 
   <div class="control">
@@ -247,7 +247,7 @@ const CONFIG={
 };
 
 let heartSizeMultiplier=1;
-let motionMultiplier=1;
+let motionMultiplier=3;
 let heartbeatMultiplier=1;
 let autoDissolve=true;
 
@@ -416,15 +416,15 @@ class Particle{
 
     // Independent particle movement
     const wave1=Math.sin(
-      clock*2.1+this.phase
+      clock*2.1*speed+this.phase
     );
 
     const wave2=Math.cos(
-      clock*1.55+this.phase*1.7
+      clock*1.55*speed+this.phase*1.7
     );
 
     const wave3=Math.sin(
-      clock*.85+this.phase*2.4
+      clock*.85*speed+this.phase*2.4
     );
 
     // Small circular orbital movement
@@ -442,23 +442,23 @@ class Particle{
 
     // Controlled movement keeps the heart silhouette intact
     const wobbleX=
-      (wave1*2.3+wave3*1.0+orbitX)*speed;
+      (wave1*2.3+wave3*1.0+orbitX)*Math.sqrt(speed);
 
     const wobbleY=
-      (wave2*2.3+wave3*.8+orbitY)*speed;
+      (wave2*2.3+wave3*.8+orbitY)*Math.sqrt(speed);
 
     const tx=pos.x+wobbleX;
     const ty=pos.y+wobbleY;
 
     // Smooth magnetic return to target
-    const follow=clamp(dt*6.5,0,1);
+    const follow=clamp(dt*6.5*Math.sqrt(speed),0,1);
 
     this.x=lerp(this.x,tx,follow);
     this.y=lerp(this.y,ty,follow);
 
     // Depth animation
     this.z+=Math.sin(
-      clock*.7+this.phase
+      clock*.7*speed+this.phase
     )*dt*.045*speed;
 
     this.z=clamp(this.z,-.6,.6);
