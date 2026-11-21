@@ -1,39 +1,34 @@
-# 💙 BLUE PARTICLE HEART
+# 💙 BLUE PARTICLE HEART — NATIONVK
 
-A standalone, full-screen particle-heart animation built with HTML, CSS and Canvas JavaScript.
+A full-screen interactive particle-heart experience built with Canvas 2D, CSS and vanilla JavaScript. No external libraries or build step required.
 
 **Live demo:** https://nationvk.github.io/BLUE-PARTICLE-HEART/
 
 ## Features
-
-- Responsive particle heart: 1,250 particles on mobile and 2,100 on desktop
-- Glowing blue heart with heartbeat pulsing
-- Touch and drag interaction: scatter particles and reform the heart
-- Automatic dissolve and reform animation
-- Settings panel for heart size, particle movement and heartbeat intensity
-- Toggle automatic dissolve/reform
-- Ambient particles and subtle energy effects
-- Mobile-friendly full-screen canvas
+- 1,600 mobile / 2,800 desktop particles with capped device-pixel ratio
+- 3D perspective rotation and heartbeat pulsing
+- Six-color cycle: Blue, Purple, Pink, Orange, Turquoise and Yellow
+- Each color holds for 12 minutes, then transitions smoothly over 3 minutes
+- Interactive touch explosion, particle repulsion and spiral rebuild
+- Automatic dissolve and reform (toggle in settings)
+- Electric lightning arcs, cosmic orbiters and subtle energy rings
+- Particle motion trails and heartbeat/touch shockwaves
+- Cinematic nebula-style background and ambient star particles
+- Settings for heart size, particle movement, heartbeat, 3D rotation, lightning, trails, orbit rings and shockwaves
+- Responsive full-screen canvas; no external dependencies
 
 ## Run locally
-
-No build step or external library is required. Open `index.html` in a browser, or serve the folder with:
-
+Open `index.html` in a browser, or serve the folder with:
 ```bash
 python -m http.server 8000
 ```
 
-Then open http://localhost:8000.
-
 ## GitHub Pages
-
-The repository deploys automatically from the `main` branch using the GitHub Actions workflow in `.github/workflows/pages.yml`.
+The project deploys from `.github/workflows/pages.yml`.
 
 ## Creator
-
 **YEASIEN AHMED** · **NATIONVK**  
 *FIND YOUR OWN PATH.*
 
 ---
-
 Made with particles and ❤️.
