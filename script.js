@@ -156,6 +156,73 @@ const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({
 }));
 scene.add(stars);
 
+// Expanding energy rings around the heart.
+const energyWaves = [];
+for (let i = 0; i < 3; i++) {
+  const wave = new THREE.Mesh(
+    new THREE.TorusGeometry(2.75, 0.012, 6, 160),
+    new THREE.MeshBasicMaterial({ color: 0x35bfff, transparent: true, opacity: 0, depthWrite: false })
+  );
+  wave.position.z = -0.12 - i * 0.025;
+  heart.add(wave);
+  energyWaves.push(wave);
+}
+
+// Small orbiting blue motes add motion without hiding the heart silhouette.
+const ORBIT_COUNT = isMobile ? 110 : 190;
+const orbitPositions = new Float32Array(ORBIT_COUNT * 3);
+const orbitSeeds = new Float32Array(ORBIT_COUNT * 4);
+for (let i = 0; i < ORBIT_COUNT; i++) {
+  const k = i * 3;
+  orbitSeeds[i * 4] = Math.random() * Math.PI * 2;
+  orbitSeeds[i * 4 + 1] = 2.9 + Math.random() * 1.25;
+  orbitSeeds[i * 4 + 2] = 0.48 + Math.random() * 0.8;
+  orbitSeeds[i * 4 + 3] = Math.random() * Math.PI * 2;
+  orbitPositions[k] = Math.cos(orbitSeeds[i * 4]) * orbitSeeds[i * 4 + 1];
+  orbitPositions[k + 1] = Math.sin(orbitSeeds[i * 4]) * orbitSeeds[i * 4 + 1] * 0.78;
+  orbitPositions[k + 2] = (Math.random() - 0.5) * 2.3;
+}
+const orbitGeometry = new THREE.BufferGeometry();
+orbitGeometry.setAttribute('position', new THREE.BufferAttribute(orbitPositions, 3));
+const orbitMotes = new THREE.Points(orbitGeometry, new THREE.PointsMaterial({
+  color: 0x55cfff, size: isMobile ? 0.045 : 0.052, transparent: true,
+  opacity: 0.68, depthWrite: false, blending: THREE.AdditiveBlending
+}));
+heart.add(orbitMotes);
+
+let heartSizeFactor = 1;
+let movementFactor = 1;
+let heartbeatFactor = 1;
+const settingsPanel = document.querySelector('#settingsPanel');
+const settingsToggle = document.querySelector('#settingsToggle');
+const settingsClose = document.querySelector('#settingsClose');
+settingsToggle.addEventListener('click', () => {
+  const open = settingsPanel.classList.toggle('open');
+  settingsToggle.setAttribute('aria-expanded', String(open));
+  settingsPanel.setAttribute('aria-hidden', String(!open));
+});
+settingsClose.addEventListener('click', () => {
+  settingsPanel.classList.remove('open');
+  settingsToggle.setAttribute('aria-expanded', 'false');
+  settingsPanel.setAttribute('aria-hidden', 'true');
+});
+function bindRange(id, outputId, setter) {
+  const input = document.querySelector('#' + id);
+  const output = document.querySelector('#' + outputId);
+  input.addEventListener('input', () => {
+    const value = Number(input.value);
+    output.value = value + '%';
+    output.textContent = value + '%';
+    setter(value / 100);
+  });
+}
+bindRange('heartSize', 'heartSizeValue', value => {
+  heartSizeFactor = value;
+  fitCamera();
+});
+bindRange('particleMotion', 'particleMotionValue', value => movementFactor = value);
+bindRange('heartbeatIntensity', 'heartbeatValue', value => heartbeatFactor = value);
+
 let paused = false;
 let exploded = false;
 let soundEnabled = false;
@@ -237,6 +304,17 @@ document.querySelector('#soundBtn').addEventListener('click', event => {
   if (soundEnabled) playTone(660);
 });
 
+function fitCamera() {
+  const aspect = innerWidth / innerHeight;
+  const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+  const heartWidth = 6.2 * heartSizeFactor + 1.1;
+  const heartHeight = 5.1 * heartSizeFactor + 1.0;
+  const distanceForWidth = heartWidth / (2 * Math.tan(verticalFov / 2) * aspect);
+  const distanceForHeight = heartHeight / (2 * Math.tan(verticalFov / 2));
+  camera.position.z = Math.max(isMobile ? 14 : 12, distanceForWidth, distanceForHeight) + 1.2;
+}
+fitCamera();
+
 let elapsed = 0;
 let lastFrameTime = performance.now();
 function animate() {
@@ -257,8 +335,20 @@ function animate() {
 
   heartMaterial.uniforms.uTime.value = elapsed;
   heartMaterial.uniforms.uGlow.value = phase === 1 || phase === 2 ? 1.22 : 1;
-  const pulse = 1 + Math.sin(elapsed * 2.25) * 0.026;
-  heart.scale.setScalar(pulse);
+  const beat = Math.pow(Math.max(0, Math.sin(elapsed * 2.25)), 5);
+  const secondaryBeat = Math.pow(Math.max(0, Math.sin(elapsed * 2.25 - 0.72)), 7);
+  const pulse = 1 + (beat * 0.026 + secondaryBeat * 0.012) * heartbeatFactor;
+  heart.scale.setScalar(pulse * heartSizeFactor);
+  heartMaterial.uniforms.uGlow.value *= 1 + beat * 0.12 * heartbeatFactor;
+  orbitMotes.rotation.z = elapsed * 0.12 * movementFactor;
+  orbitMotes.rotation.x = Math.sin(elapsed * 0.22) * 0.12;
+  energyWaves.forEach((wave, index) => {
+    const wavePhase = (elapsed * 0.34 + index / 3) % 1;
+    const waveScale = 0.72 + wavePhase * 0.72;
+    wave.scale.set(waveScale, waveScale, 1);
+    wave.material.opacity = Math.sin(wavePhase * Math.PI) * 0.22;
+    wave.rotation.z = elapsed * (index % 2 ? -0.08 : 0.08);
+  });
   heart.rotation.y += (pointerX * 0.6 + Math.sin(elapsed * 0.2) * 0.1 - heart.rotation.y) * 0.025;
   heart.rotation.x += (-pointerY * 0.45 - heart.rotation.x) * 0.025;
   heart.position.y = 0.14 + Math.sin(elapsed * 0.8) * 0.065;
@@ -274,10 +364,17 @@ function animate() {
       velocity[k + 1] *= 0.987;
       velocity[k + 2] *= 0.987;
     } else {
-      const ease = phase === 3 ? 0.035 : 0.055;
-      p[k] += (targets[k] - p[k]) * ease;
-      p[k + 1] += (targets[k + 1] - p[k + 1]) * ease;
-      p[k + 2] += (targets[k + 2] - p[k + 2]) * ease;
+      const t = elapsed;
+      const move = movementFactor;
+      const waveX = (Math.sin(t * (1.15 + move * 0.18) + i * 0.071) * 0.026 +
+        Math.cos(t * 0.72 + i * 0.031) * 0.018) * move;
+      const waveY = (Math.cos(t * (1.05 + move * 0.16) + i * 0.053) * 0.03 +
+        Math.sin(t * 0.61 + i * 0.027) * 0.014) * move;
+      const waveZ = Math.sin(t * 1.3 + i * 0.047) * 0.035 * move;
+      const ease = phase === 3 ? 0.045 : 0.075;
+      p[k] += (targets[k] + waveX - p[k]) * ease;
+      p[k + 1] += (targets[k + 1] + waveY - p[k + 1]) * ease;
+      p[k + 2] += (targets[k + 2] + waveZ - p[k + 2]) * ease;
     }
   }
   heartGeometry.attributes.position.needsUpdate = true;
@@ -312,7 +409,8 @@ function resize() {
   const width = innerWidth;
   const height = innerHeight;
   camera.aspect = width / height;
-  camera.position.z = width < 700 ? 14 : 12;
+  camera.aspect = width / height;
+  fitCamera();
   camera.updateProjectionMatrix();
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.setSize(width, height);
