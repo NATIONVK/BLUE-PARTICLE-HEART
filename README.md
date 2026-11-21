@@ -1,73 +1,39 @@
 # 💙 BLUE PARTICLE HEART
 
-A cinematic, interactive 3D particle-heart experience built with **Three.js, WebGL, GLSL shaders, HTML, CSS and JavaScript**.
+A standalone, full-screen particle-heart animation built with HTML, CSS and Canvas JavaScript.
 
 **Live demo:** https://nationvk.github.io/BLUE-PARTICLE-HEART/
 
-## ✨ Experience
+## Features
 
-The heart runs in a continuous **13-second cinematic loop**:
+- Responsive particle heart: 1,250 particles on mobile and 2,100 on desktop
+- Glowing blue heart with heartbeat pulsing
+- Touch and drag interaction: scatter particles and reform the heart
+- Automatic dissolve and reform animation
+- Settings panel for heart size, particle movement and heartbeat intensity
+- Toggle automatic dissolve/reform
+- Ambient particles and subtle energy effects
+- Mobile-friendly full-screen canvas
 
-| Time | Animation |
-|---|---|
-| 00:00–00:03 | A luminous blue particle heart pulses above a rotating energy portal |
-| 00:04–00:07 | The heart bursts outward into thousands of cyan-blue particles and rising embers |
-| 00:08 | The particle cloud hangs in a brief energy-suspension moment |
-| 00:09–00:12 | Particles smoothly return and reconstruct the glowing heart |
-| 00:13 | The sequence loops seamlessly |
+## Run locally
 
-## ⚡ Features
-
-- Thousands of cobalt, sky-blue and white glowing particles
-- Organic heartbeat pulse and smooth 3D movement
-- Automatic 13-second burst-and-reform sequence
-- Interactive scatter and reconstruction
-- Extra burst embers with radial motion
-- Animated concentric energy rings and blue platform lighting
-- Deep-space star field and custom GLSL point shaders
-- Pointer-responsive heart rotation
-- Pause/resume and optional sound effects
-- Responsive rendering tuned for mobile and desktop
-
-## 🎮 Controls
-
-- Tap/click the heart or **SCATTER** to trigger a particle burst or reform it
-- Use **PAUSE** to pause or resume the animation
-- Toggle **SOUND** for subtle interface tones
-- Move the pointer to influence the heart's rotation
-- The automatic sequence resumes after a manual interaction
-
-## 🚀 Run locally
-
-Serve the project with a local web server because it uses JavaScript modules.
+No build step or external library is required. Open `index.html` in a browser, or serve the folder with:
 
 ```bash
 python -m http.server 8000
 ```
 
-Open http://localhost:8000.
+Then open http://localhost:8000.
 
-## 🌐 GitHub Pages
+## GitHub Pages
 
-1. Open **Settings → Pages**.
-2. Select **Deploy from a branch**.
-3. Choose **main** and **/ (root)**, then save.
-4. After deployment, visit https://nationvk.github.io/BLUE-PARTICLE-HEART/.
+The repository deploys automatically from the `main` branch using the GitHub Actions workflow in `.github/workflows/pages.yml`.
 
-## 🧰 Technology
-
-- Three.js r160 via jsDelivr CDN
-- WebGL and custom GLSL shader materials
-- HTML5, CSS3 and JavaScript ES modules
-- Google Fonts: Orbitron and Rajdhani
-
-An internet connection is required to load Three.js and Google Fonts.
-
-## 👨‍💻 Creator
+## Creator
 
 **YEASIEN AHMED** · **NATIONVK**  
 *FIND YOUR OWN PATH.*
 
 ---
 
-Made with particles, patience and ❤️.
+Made with particles and ❤️.
