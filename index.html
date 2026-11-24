@@ -195,9 +195,7 @@ input[type="range"]{
 
   <div class="toggleRow"><label for="autoDissolve">Auto Dissolve & Reform</label><input id="autoDissolve" type="checkbox" checked></div>
   <div class="toggleRow"><label for="rotation3D">3D Heart Rotation</label><input id="rotation3D" type="checkbox" checked></div>
-  <div class="toggleRow"><label for="lightningToggle">Electric Lightning</label><input id="lightningToggle" type="checkbox" checked></div>
   <div class="toggleRow"><label for="trailToggle">Particle Trails</label><input id="trailToggle" type="checkbox" checked></div>
-  <div class="toggleRow"><label for="orbitToggle">Cosmic Orbit Rings</label><input id="orbitToggle" type="checkbox" checked></div>
   <div class="toggleRow"><label for="shockwaveToggle">Heartbeat Shockwaves</label><input id="shockwaveToggle" type="checkbox" checked></div>
 
   <p class="panelNote">
@@ -225,7 +223,7 @@ const heartSizeInput=document.getElementById("heartSize");
 const motionInput=document.getElementById("motion");
 const heartbeatInput=document.getElementById("heartbeatControl");
 const autoDissolveInput=document.getElementById("autoDissolve");
-const rotation3DInput=document.getElementById("rotation3D"),lightningInput=document.getElementById("lightningToggle"),trailInput=document.getElementById("trailToggle"),orbitInput=document.getElementById("orbitToggle"),shockwaveInput=document.getElementById("shockwaveToggle");
+const rotation3DInput=document.getElementById("rotation3D"),trailInput=document.getElementById("trailToggle"),shockwaveInput=document.getElementById("shockwaveToggle");
 
 const heartSizeValue=document.getElementById("heartSizeValue");
 const motionValue=document.getElementById("motionValue");
@@ -244,7 +242,6 @@ const CONFIG={
   mobileCount:1600,
   desktopCount:2800,
   ambientCount:100,
-  orbitCount:8,
   baseHeartScale:.235,
   dissolveDuration:2.8,
   gatherDuration:2.1
@@ -253,16 +250,15 @@ const CONFIG={
 let heartSizeMultiplier=1;
 let motionMultiplier=3;
 let heartbeatMultiplier=1;
-let autoDissolve=true,rotation3D=true,lightningEnabled=true,trailsEnabled=true,orbitEnabled=true,shockwavesEnabled=true;
+let autoDissolve=true,rotation3D=true,trailsEnabled=true,shockwavesEnabled=true;
 const PALETTE=[[37,143,255],[157,91,255],[255,76,174],[255,145,58],[34,222,205],[255,220,72]];
-let activeColor="rgb(37,143,255)",activeColorRGB=PALETTE[0].slice(),shockwaves=[],lightningBolts=[],lightningClock=0,lastHeartbeat=0;
+let activeColor="rgb(37,143,255)",activeColorRGB=PALETTE[0].slice(),shockwaves=[],lastHeartbeat=0;
 
 /* STATE */
 
 let W=0,H=0,DPR=1;
 let particles=[];
 let ambient=[];
-let orbiters=[];
 
 let lastTime=0;
 let clock=0;
@@ -328,9 +324,7 @@ heartbeatInput.addEventListener("input",()=>{
 
 autoDissolveInput.addEventListener("change",()=>{autoDissolve=autoDissolveInput.checked;});
 rotation3DInput.addEventListener("change",()=>rotation3D=rotation3DInput.checked);
-lightningInput.addEventListener("change",()=>lightningEnabled=lightningInput.checked);
 trailInput.addEventListener("change",()=>trailsEnabled=trailInput.checked);
-orbitInput.addEventListener("change",()=>orbitEnabled=orbitInput.checked);
 shockwaveInput.addEventListener("change",()=>shockwavesEnabled=shockwaveInput.checked);
 
 /* HEART GEOMETRY */
@@ -592,63 +586,6 @@ class AmbientParticle{
   }
 }
 
-/* ORBITERS */
-
-function createOrbiters(){
-  orbiters=[];
-
-  for(let i=0;i<CONFIG.orbitCount;i++){
-    orbiters.push({
-      angle:rand(0,TAU),
-      radius:rand(.62,.83),
-      speed:rand(.12,.32)*
-        (Math.random()<.5?-1:1),
-      size:rand(1,1.6),
-      phase:rand(0,TAU)
-    });
-  }
-}
-
-function updateOrbiters(dt){
-  for(const o of orbiters){
-    o.angle+=o.speed*dt*motionMultiplier;
-  }
-}
-
-function drawOrbiters(){
-  if(!orbitEnabled)return;
-  const scale=heartScale();
-
-  ctx.save();
-  ctx.globalCompositeOperation="source-over";
-
-  for(let ring=0;ring<3;ring++){
-    ctx.beginPath();ctx.ellipse(heartCenter.x,heartCenter.y,scale*(19+ring*2.2),scale*(12+ring*1.5),Math.sin(clock*.18+ring)*.22,0,TAU);
-    ctx.strokeStyle=colorRGBA(.12-ring*.025);ctx.lineWidth=1;ctx.stroke();
-  }
-
-  for(const o of orbiters){
-    const radius=scale*18*o.radius;
-
-    const x=heartCenter.x+
-      Math.cos(o.angle)*radius;
-
-    const y=heartCenter.y+
-      Math.sin(o.angle)*radius*.75;
-
-    ctx.globalAlpha=.45+
-      .12*Math.sin(clock*2+o.phase);
-
-    ctx.fillStyle=activeColor;
-
-    ctx.beginPath();
-    ctx.arc(x,y,o.size,0,TAU);
-    ctx.fill();
-  }
-
-  ctx.restore();
-}
-
 /* SPIRAL STREAM */
 
 function drawSpiralStreams(){
@@ -734,9 +671,6 @@ function colorRGBA(a){return `rgba(${activeColorRGB[0]},${activeColorRGB[1]},${a
 function spawnShockwave(x,y,strength=1){shockwaves.push({x,y,r:8,life:0,max:1.15,strength});if(shockwaves.length>14)shockwaves.shift();}
 function updateShockwaves(dt){for(let i=shockwaves.length-1;i>=0;i--){const w=shockwaves[i];w.life+=dt;w.r+=dt*(150+110*w.strength);if(w.life>=w.max)shockwaves.splice(i,1);}}
 function drawShockwaves(){if(!shockwavesEnabled)return;ctx.save();ctx.globalCompositeOperation="lighter";for(const w of shockwaves){const a=(1-w.life/w.max)*.28;ctx.beginPath();ctx.arc(w.x,w.y,w.r,0,TAU);ctx.strokeStyle=colorRGBA(a);ctx.lineWidth=1.5+2*a;ctx.shadowBlur=16;ctx.shadowColor=activeColor;ctx.stroke();}ctx.restore();}
-function refreshLightning(){lightningBolts=[];for(let n=0;n<5;n++){const a=rand(0,TAU),r=heartScale()*rand(12,18),sx=heartCenter.x+Math.cos(a)*r,sy=heartCenter.y+Math.sin(a)*r*.78,ex=heartCenter.x+Math.cos(a+rand(-.5,.5))*r*rand(1.1,1.5),ey=heartCenter.y+Math.sin(a+rand(-.5,.5))*r*rand(1.1,1.5)*.78,points=[{x:sx,y:sy}];for(let j=1;j<7;j++){const t=j/7;points.push({x:lerp(sx,ex,t)+rand(-13,13),y:lerp(sy,ey,t)+rand(-13,13)});}points.push({x:ex,y:ey});lightningBolts.push(points);}}
-function drawLightning(dt){if(!lightningEnabled)return;lightningClock-=dt;if(lightningClock<=0){refreshLightning();lightningClock=rand(.12,.24);}ctx.save();ctx.globalCompositeOperation="lighter";ctx.lineCap="round";for(const bolt of lightningBolts){ctx.beginPath();bolt.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.strokeStyle=colorRGBA(.36);ctx.lineWidth=1.15;ctx.shadowBlur=13;ctx.shadowColor=activeColor;ctx.stroke();}ctx.restore();}
-
 /* RESIZE */
 
 function resize(){
@@ -767,7 +701,6 @@ function resize(){
       ambient.push(new AmbientParticle());
     }
 
-    createOrbiters();
   }else{
     const sx=oldW?W/oldW:1;
     const sy=oldH?H/oldH:1;
@@ -997,9 +930,7 @@ function animate(timestamp){
       p.updateNormal(dt);
     }
 
-    updateOrbiters(dt);
-
-    drawSpiralStreams();drawEnergy();drawOrbiters();drawLightning(dt);
+    drawSpiralStreams();drawEnergy();
 
     if(autoDissolve&&clock>nextDissolve){
       startDissolve();
@@ -1012,7 +943,7 @@ function animate(timestamp){
       p.updateExplode(dt);
     }
 
-    drawSpiralStreams();drawLightning(dt);
+    drawSpiralStreams();
 
     if(!pointer.down){
       reformHeart(
@@ -1108,7 +1039,7 @@ function animate(timestamp){
 
 /* START */
 
-resize();refreshLightning();document.addEventListener("visibilitychange",()=>{lastTime=0;});
+resize();document.addEventListener("visibilitychange",()=>{lastTime=0;});
 requestAnimationFrame(animate);
 
 })();
